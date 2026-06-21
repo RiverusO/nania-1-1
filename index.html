@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>English Reading Challenge</title>
+    <title>English Reading Challenge - The Magician's Nephew</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -28,63 +28,19 @@
         }
         h2 {
             color: #2980b9;
-            margin-top: 30px;
+            margin-top: 10px;
             border-bottom: 1px solid #eee;
-            padding-bottom: 5px;
-        }
-        /* Home Menu Styles */
-        #home-screen {
-            display: block;
+            padding-bottom: 10px;
             text-align: center;
-        }
-        .story-btn {
-            display: inline-block;
-            width: 80%;
-            margin: 10px auto;
-            padding: 15px 20px;
-            background-color: #ecf0f1;
-            color: #2c3e50;
-            font-size: 18px;
-            font-weight: bold;
-            border: 2px solid #bdc3c7;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: left;
-        }
-        .story-btn:hover {
-            background-color: #3498db;
-            color: white;
-            border-color: #3498db;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .story-btn span {
-            float: right;
-            color: #7f8c8d;
-            font-size: 14px;
-            margin-top: 3px;
-        }
-        .story-btn:hover span { color: #ecf0f1; }
-        
-        /* Quiz Screen Styles */
-        #quiz-screen { display: none; }
-        .back-btn {
-            background: none;
-            border: none;
-            color: #3498db;
-            font-size: 16px;
-            cursor: pointer;
-            margin-bottom: 20px;
-            text-decoration: underline;
         }
         .name-input-section {
             text-align: center; 
-            margin-bottom: 20px; 
+            margin-bottom: 25px; 
+            margin-top: 20px;
             background: #e8f4fd; 
-            padding: 15px; 
+            padding: 20px; 
             border-radius: 8px;
-            border: 1px solid #b6d4fe;
+            border: 2px solid #b6d4fe;
         }
         .name-input-section label {
             font-weight: bold; 
@@ -134,7 +90,7 @@
             box-sizing: border-box;
             margin-top: 10px;
         }
-        .submit-btn, .next-btn {
+        .submit-btn {
             display: block;
             width: 100%;
             padding: 15px;
@@ -148,10 +104,8 @@
             margin-top: 30px;
             transition: background 0.3s;
         }
-        .submit-btn:hover, .next-btn:hover { background-color: #2980b9; }
+        .submit-btn:hover { background-color: #2980b9; }
         .submit-btn:disabled { background-color: #95a5a6; cursor: not-allowed; }
-        .next-btn { background-color: #27ae60; margin-top: 15px; }
-        .next-btn:hover { background-color: #2ecc71; }
         
         /* Feedback Styles */
         .feedback {
@@ -211,57 +165,187 @@
 
 <div class="container">
     <h1>📚 English Reading Challenge</h1>
+    <h2>The Magician's Nephew<br>Chapter 1: The Wrong Door</h2>
 
-    <div id="home-screen">
-        <h2>Please Select a Story</h2>
-        <p>You can choose any story to start. Take your time!</p>
-        <div id="story-menu">
-            </div>
+    <div class="name-input-section">
+        <label for="studentName">Student Name:</label>
+        <input type="text" id="studentName" placeholder="Enter your full name here">
     </div>
+    
+    <form id="quizForm">
+        <div id="questions-container">
+            </div>
+        <button type="button" class="submit-btn" id="submitBtn" onclick="checkAnswers()">Submit Answers</button>
+    </form>
 
-    <div id="quiz-screen">
-        <button class="back-btn" onclick="showHome()">← Back to Main Menu</button>
-        
-        <div class="name-input-section">
-            <label for="studentName">Student Name:</label>
-            <input type="text" id="studentName" placeholder="Enter your full name here">
-        </div>
-
-        <h2 id="quiz-title">Story Title</h2>
-        
-        <form id="quizForm">
-            <div id="questions-container">
-                </div>
-            <button type="button" class="submit-btn" id="submitBtn" onclick="checkAnswers()">Submit Answers</button>
-        </form>
-
-        <div id="result-section">
-            <div id="result-score"></div>
-            <div id="result-message"></div>
-            <button type="button" class="next-btn" id="nextStoryBtn" onclick="nextStory()">Back to Menu</button>
-        </div>
+    <div id="result-section">
+        <div id="result-score"></div>
+        <div id="result-message"></div>
     </div>
 </div>
 
 <script>
     // User's exclusive Google Apps Script URL
     const GAS_URL = "https://script.google.com/macros/s/AKfycbwitzfPzW-A1-Bk0O4ozPEixlJGABW3PlQTF_nycxhPzfppEwulT-2G8RQQMpZFGTf--A/exec";
+    const storyTitle = "The Magician's Nephew - Chapter 1";
 
-    // Quiz Data for The Magician's Nephew
-    const storiesData = [
-        {
-            id: 0,
-            title: "The Magician's Nephew - Chapter 1: The Wrong Door",
-            questions: [
-                { id: "q1", type: "mc", text: "1. (True/False) Polly and Digory met for the first time in school.", options: ["True", "False"], answer: "False" },
-                { id: "q2", type: "mc", text: "2. (True/False) Digory used to live in the countryside before moving to London.", options: ["True", "False"], answer: "True" },
-                { id: "q3", type: "mc", text: "3. (True/False) Digory's father was living in India.", options: ["True", "False"], answer: "True" },
-                { id: "q4", type: "mc", text: "4. (True/False) Polly and Digory found a secret tunnel in the cellar.", options: ["True", "False"], answer: "False" },
-                { id: "q5", type: "mc", text: "5. (True/False) Polly disappeared after touching one of the yellow rings.", options: ["True", "False"], answer: "True" },
-                { id: "q6", type: "mc", text: "6. (Multiple Choice) Why was Digory unhappy about living in London?", options: ["A. He missed his school.", "B. He missed the countryside and his pony.", "C. He had no friends.", "D. He disliked Polly."], answer: "B. He missed the countryside and his pony." },
-                { id: "q7", type: "mc", text: "7. (Multiple Choice) What made Polly and Digory become friends?", options: ["A. They attended the same school.", "B. They met at the park.", "C. They lived next door to each other and spent time together.", "D. Their parents were friends."], answer: "C. They lived next door to each other and spent time together." },
-                { id: "q8", type: "mc", text: "8. (Multiple Choice) Why did Polly and Digory start exploring the attic?", options: ["A. They were looking for treasure.", "B. The summer was cold and rainy.", "C. They wanted to hide from adults.", "D. They lost something important."], answer: "B. The summer was cold and rainy." },
-                { id: "q9", type: "mc", text: "9. (Multiple Choice) What did Polly notice first in Uncle Andrew's study?", options: ["A. The fireplace.", "B. The bookshelves.", "C. The microscope.", "D. The bright coloured rings."], answer: "D. The bright coloured rings." },
-                { id: "q10", type: "mc", text: "10. (Multiple Choice) What was Uncle Andrew's reaction when he saw the children?", options: ["A. He was angry and sent them away.", "B. He was frightened.", "C. He seemed pleased to see them.", "D. He ignored them."], answer: "C. He seemed pleased to see them." },
-                { id: "q11", type: "sa", text: "11. (Short Answer) Why did Polly and Digory think Uncle Andrew might be strange or mysterious?", suggested: "Uncle Andrew was mysterious because he had a forbidden study, strange behaviour, and Digory heard a yell coming from upstairs. Aunt Letty also stopped him from talking about certain things." },
-                { id: "q12", type: "sa", text: "12. (Inference) Why do you think Digory warned Polly not to touch the rings? Use evidence from the story to support your answer.", suggested: "Digory warned Polly because he did not trust Uncle Andrew. He noticed that
+    // Quiz Data
+    const questions = [
+        { id: "q1", type: "mc", text: "Part A: 1. (True/False) Polly and Digory met for the first time in school.", options: ["True", "False"], answer: "False" },
+        { id: "q2", type: "mc", text: "2. (True/False) Digory used to live in the countryside before moving to London.", options: ["True", "False"], answer: "True" },
+        { id: "q3", type: "mc", text: "3. (True/False) Digory's father was living in India.", options: ["True", "False"], answer: "True" },
+        { id: "q4", type: "mc", text: "4. (True/False) Polly and Digory found a secret tunnel in the cellar.", options: ["True", "False"], answer: "False" },
+        { id: "q5", type: "mc", text: "5. (True/False) Polly disappeared after touching one of the yellow rings.", options: ["True", "False"], answer: "True" },
+        { id: "q6", type: "mc", text: "Part B: 6. (Multiple Choice) Why was Digory unhappy about living in London?", options: ["A. He missed his school.", "B. He missed the countryside and his pony.", "C. He had no friends.", "D. He disliked Polly."], answer: "B. He missed the countryside and his pony." },
+        { id: "q7", type: "mc", text: "7. (Multiple Choice) What made Polly and Digory become friends?", options: ["A. They attended the same school.", "B. They met at the park.", "C. They lived next door to each other and spent time together.", "D. Their parents were friends."], answer: "C. They lived next door to each other and spent time together." },
+        { id: "q8", type: "mc", text: "8. (Multiple Choice) Why did Polly and Digory start exploring the attic?", options: ["A. They were looking for treasure.", "B. The summer was cold and rainy.", "C. They wanted to hide from adults.", "D. They lost something important."], answer: "B. The summer was cold and rainy." },
+        { id: "q9", type: "mc", text: "9. (Multiple Choice) What did Polly notice first in Uncle Andrew's study?", options: ["A. The fireplace.", "B. The bookshelves.", "C. The microscope.", "D. The bright coloured rings."], answer: "D. The bright coloured rings." },
+        { id: "q10", type: "mc", text: "10. (Multiple Choice) What was Uncle Andrew's reaction when he saw the children?", options: ["A. He was angry and sent them away.", "B. He was frightened.", "C. He seemed pleased to see them.", "D. He ignored them."], answer: "C. He seemed pleased to see them." },
+        { id: "q11", type: "sa", text: "Part C: 11. (Short Answer) Why did Polly and Digory think Uncle Andrew might be strange or mysterious?", suggested: "Uncle Andrew was mysterious because he had a forbidden study, strange behaviour, and Digory heard a yell coming from upstairs. Aunt Letty also stopped him from talking about certain things." },
+        { id: "q12", type: "sa", text: "Part D: 12. (Inference) Why do you think Digory warned Polly not to touch the rings? Use evidence from the story to support your answer.", suggested: "Digory warned Polly because he did not trust Uncle Andrew. He noticed that Uncle Andrew looked eager and greedy when Polly went near the rings. He felt that something dangerous might happen." },
+        { id: "q13", type: "sa", text: "Part E: 13. (Explanation) How did the children end up in Uncle Andrew's study instead of the empty house?", suggested: "The children miscalculated the distance while travelling through the attic tunnel. They thought they had reached the empty house, but they had actually entered Uncle Andrew's forbidden study." },
+        { id: "q14", type: "sa", text: "Part F: 14. (Personal Response) If you found a secret tunnel leading to a mysterious room, would you explore it? Why or why not? Write 3–5 sentences.", suggested: "Sample answer: I would explore the tunnel, but I would be very careful. I would want to discover what was hidden inside. However, I would make sure I was with a friend and tell an adult where I was going first." }
+    ];
+
+    // Build the quiz on page load
+    window.onload = function() {
+        const container = document.getElementById('questions-container');
+        
+        questions.forEach((q) => {
+            const block = document.createElement('div');
+            block.className = 'question-block';
+            block.id = `block-${q.id}`;
+
+            let html = `<div class="question-text">${q.text}</div>`;
+
+            if (q.type === 'mc') {
+                html += `<div class="options">`;
+                q.options.forEach(opt => {
+                    html += `<label><input type="radio" name="${q.id}" value="${opt}"> ${opt}</label>`;
+                });
+                html += `</div><div class="feedback" id="fb-${q.id}"></div>`;
+            } else if (q.type === 'sa') {
+                html += `<textarea rows="3" placeholder="Type your answer here..."></textarea>`;
+                html += `<div class="suggested-answer"><strong>Suggested Answer:</strong> ${q.suggested}</div>`;
+            }
+
+            block.innerHTML = html;
+            container.appendChild(block);
+        });
+    };
+
+    // Check answers, send data to GAS, and provide feedback
+    function checkAnswers() {
+        // Step 1: Validate Student Name
+        const studentName = document.getElementById('studentName').value.trim();
+        if (!studentName) {
+            alert("Please enter your name before submitting!");
+            document.getElementById('studentName').focus();
+            return;
+        }
+
+        // Change button state
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.innerText = "Submitting... Please wait.";
+        submitBtn.disabled = true;
+
+        let score = 0;
+        let mcTotal = 0;
+
+        // Step 2: Grade Objective Questions
+        questions.forEach(q => {
+            if (q.type === 'mc') {
+                mcTotal++;
+                const selected = document.querySelector(`input[name="${q.id}"]:checked`);
+                const feedbackEl = document.getElementById(`fb-${q.id}`);
+                const blockEl = document.getElementById(`block-${q.id}`);
+                
+                feedbackEl.style.display = "block";
+
+                if (selected) {
+                    if (selected.value === q.answer) {
+                        score++;
+                        feedbackEl.innerHTML = "✅ Correct";
+                        feedbackEl.className = "feedback correct-feedback";
+                        blockEl.style.borderColor = "#c3e6cb";
+                    } else {
+                        feedbackEl.innerHTML = `❌ Incorrect. Correct Answer: <strong>${q.answer}</strong>`;
+                        feedbackEl.className = "feedback wrong-feedback";
+                        blockEl.style.borderColor = "#f5c6cb";
+                    }
+                } else {
+                    feedbackEl.innerHTML = `⚠️ Unanswered. Correct Answer: <strong>${q.answer}</strong>`;
+                    feedbackEl.className = "feedback wrong-feedback";
+                    blockEl.style.borderColor = "#f5c6cb";
+                }
+            }
+        });
+
+        // Expand suggested answers
+        document.querySelectorAll('.suggested-answer').forEach(el => el.style.display = 'block');
+
+        // Step 3: Collect Text Area Answers
+        const textareas = document.querySelectorAll('#questions-container textarea');
+        const q11Answer = textareas.length > 0 ? "Q11: " + textareas[0].value : "";
+        const q12Answer = textareas.length > 1 ? "Q12: " + textareas[1].value : "";
+        const combinedQ4Column = q11Answer + "\n\n" + q12Answer;
+
+        const q13Answer = textareas.length > 2 ? "Q13: " + textareas[2].value : "";
+        const q14Answer = textareas.length > 3 ? "Q14: " + textareas[3].value : "";
+        const combinedQ5Column = q13Answer + "\n\n" + q14Answer;
+
+        // Step 4: Prepare Data Payload for GAS
+        const dataPayload = {
+            studentName: studentName,
+            storyTitle: storyTitle,
+            score: score + " / " + mcTotal,
+            q4: combinedQ4Column,
+            q5: combinedQ5Column
+        };
+
+        // Step 5: Send to Google Apps Script
+        fetch(GAS_URL, {
+            method: 'POST',
+            body: JSON.stringify(dataPayload)
+        })
+        .then(response => {
+            submitBtn.style.display = 'none';
+            displayFeedback(score, mcTotal);
+        })
+        .catch(error => {
+            alert("Network error. Please try submitting again!");
+            submitBtn.innerText = "Submit Answers";
+            submitBtn.disabled = false;
+        });
+    }
+
+    // Dynamic, substantive feedback generation
+    function displayFeedback(score, total) {
+        const resultSection = document.getElementById('result-section');
+        const scoreEl = document.getElementById('result-score');
+        const msgEl = document.getElementById('result-message');
+
+        resultSection.style.display = 'block';
+        scoreEl.innerText = `Objective Questions Score: ${score} / ${total}`;
+
+        let ratio = score / total;
+        let specificDetail = "how Digory missed his pony in the countryside, and how Uncle Andrew tricked Polly into touching the mysterious yellow rings in his forbidden study";
+        let feedbackHTML = "";
+
+        if (ratio === 1) {
+            feedbackHTML = `<strong>Absolutely brilliant work! 🏆 Your reading comprehension skills are outstanding!</strong><br>
+            You paid incredibly close attention to the story. You perfectly understood ${specificDetail}! Getting a perfect score on the objective questions shows you are a very careful reader. Please scroll down to review your short answers and see if your thoughts match the suggested deep insights. Keep up the amazing work!`;
+        } else if (ratio >= 0.7) {
+            feedbackHTML = `<strong>Great job! You have a really solid grasp of the story's main plot! 🌟</strong><br>
+            You clearly understood the core events of Chapter 1. For the questions you missed, try looking back at the text for clues—especially paying attention to character dialogues or specific details (like ${specificDetail}). Reviewing your mistakes above will help you catch even more magical details next time. You are doing fantastic!`;
+        } else {
+            feedbackHTML = `<strong>Completing the quiz is a fantastic first step! 💪 I am proud of your effort!</strong><br>
+            Building reading comprehension takes time and practice, especially with a magical mystery story like this one! Chapter 1 has quite a few specific details to keep track of (such as ${specificDetail}), which can sometimes be tricky. Don't be discouraged at all! I highly recommend reviewing the "Correct Answers" above, and then reading the chapter one more time with those answers in mind. You will be surprised at how the clues stand out! Keep trying, you will definitely improve!`;
+        }
+
+        msgEl.innerHTML = feedbackHTML;
+        resultSection.scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+</body>
+</html>
