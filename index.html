@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Reading Challenge</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            background-color: #f4f7f6;
+        }
+        .container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #2980b9;
+            margin-top: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        /* Home Menu Styles */
+        #home-screen {
+            display: block;
+            text-align: center;
+        }
+        .story-btn {
+            display: inline-block;
+            width: 80%;
+            margin: 10px auto;
+            padding: 15px 20px;
+            background-color: #ecf0f1;
+            color: #2c3e50;
+            font-size: 18px;
+            font-weight: bold;
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+        }
+        .story-btn:hover {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .story-btn span {
+            float: right;
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-top: 3px;
+        }
+        .story-btn:hover span { color: #ecf0f1; }
+        
+        /* Quiz Screen Styles */
+        #quiz-screen { display: none; }
+        .back-btn {
+            background: none;
+            border: none;
+            color: #3498db;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            text-decoration: underline;
+        }
+        .name-input-section {
+            text-align: center; 
+            margin-bottom: 20px; 
+            background: #e8f4fd; 
+            padding: 15px; 
+            border-radius: 8px;
+            border: 1px solid #b6d4fe;
+        }
+        .name-input-section label {
+            font-weight: bold; 
+            font-size: 18px; 
+            color: #2c3e50;
+            margin-right: 10px;
+        }
+        .name-input-section input {
+            padding: 10px; 
+            font-size: 16px; 
+            border-radius: 5px; 
+            border: 1px solid #ccc; 
+            width: 60%; 
+            max-width: 300px;
+        }
+        .question-block {
+            margin-bottom: 25px;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            background-color: #fcfcfc;
+        }
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            color: #2c3e50;
+        }
+        .options label {
+            display: block;
+            margin-bottom: 8px;
+            cursor: pointer;
+            padding: 8px 10px;
+            border-radius: 5px;
+            transition: background 0.2s;
+        }
+        .options label:hover { background-color: #f0f8ff; }
+        .options input[type="radio"] { margin-right: 10px; }
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 16px;
+            resize: vertical;
+            box-sizing: border-box;
+            margin-top: 10px;
+        }
+        .submit-btn, .next-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #3498db;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: background 0.3s;
+        }
+        .submit-btn:hover, .next-btn:hover { background-color: #2980b9; }
+        .submit-btn:disabled { background-color: #95a5a6; cursor: not-allowed; }
+        .next-btn { background-color: #27ae60; margin-top: 15px; }
+        .next-btn:hover { background-color: #2ecc71; }
+        
+        /* Feedback Styles */
+        .feedback {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .correct-feedback {
+            color: #155724;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        .wrong-feedback {
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        .suggested-answer {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #fff3cd;
+            border-left: 5px solid #ffc107;
+            border-radius: 4px;
+            color: #856404;
+        }
+        #result-section {
+            display: none;
+            margin-top: 40px;
+            padding: 25px;
+            background-color: #e8f4fd;
+            border: 2px solid #3498db;
+            border-radius: 10px;
+            text-align: center;
+        }
+        #result-score {
+            font-size: 28px;
+            color: #2c3e50;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        #result-message {
+            font-size: 16px;
+            color: #333;
+            text-align: left;
+            line-height: 1.8;
+            padding: 15px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📚 English Reading Challenge</h1>
+
+    <div id="home-screen">
+        <h2>Please Select a Story</h2>
+        <p>You can choose any story to start. Take your time!</p>
+        <div id="story-menu">
+            </div>
+    </div>
+
+    <div id="quiz-screen">
+        <button class="back-btn" onclick="showHome()">← Back to Main Menu</button>
+        
+        <div class="name-input-section">
+            <label for="studentName">Student Name:</label>
+            <input type="text" id="studentName" placeholder="Enter your full name here">
+        </div>
+
+        <h2 id="quiz-title">Story Title</h2>
+        
+        <form id="quizForm">
+            <div id="questions-container">
+                </div>
+            <button type="button" class="submit-btn" id="submitBtn" onclick="checkAnswers()">Submit Answers</button>
+        </form>
+
+        <div id="result-section">
+            <div id="result-score"></div>
+            <div id="result-message"></div>
+            <button type="button" class="next-btn" id="nextStoryBtn" onclick="nextStory()">Back to Menu</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // User's exclusive Google Apps Script URL
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbwitzfPzW-A1-Bk0O4ozPEixlJGABW3PlQTF_nycxhPzfppEwulT-2G8RQQMpZFGTf--A/exec";
+
+    // Quiz Data for The Magician's Nephew
+    const storiesData = [
+        {
+            id: 0,
+            title: "The Magician's Nephew - Chapter 1: The Wrong Door",
+            questions: [
+                { id: "q1", type: "mc", text: "1. (True/False) Polly and Digory met for the first time in school.", options: ["True", "False"], answer: "False" },
+                { id: "q2", type: "mc", text: "2. (True/False) Digory used to live in the countryside before moving to London.", options: ["True", "False"], answer: "True" },
+                { id: "q3", type: "mc", text: "3. (True/False) Digory's father was living in India.", options: ["True", "False"], answer: "True" },
+                { id: "q4", type: "mc", text: "4. (True/False) Polly and Digory found a secret tunnel in the cellar.", options: ["True", "False"], answer: "False" },
+                { id: "q5", type: "mc", text: "5. (True/False) Polly disappeared after touching one of the yellow rings.", options: ["True", "False"], answer: "True" },
+                { id: "q6", type: "mc", text: "6. (Multiple Choice) Why was Digory unhappy about living in London?", options: ["A. He missed his school.", "B. He missed the countryside and his pony.", "C. He had no friends.", "D. He disliked Polly."], answer: "B. He missed the countryside and his pony." },
+                { id: "q7", type: "mc", text: "7. (Multiple Choice) What made Polly and Digory become friends?", options: ["A. They attended the same school.", "B. They met at the park.", "C. They lived next door to each other and spent time together.", "D. Their parents were friends."], answer: "C. They lived next door to each other and spent time together." },
+                { id: "q8", type: "mc", text: "8. (Multiple Choice) Why did Polly and Digory start exploring the attic?", options: ["A. They were looking for treasure.", "B. The summer was cold and rainy.", "C. They wanted to hide from adults.", "D. They lost something important."], answer: "B. The summer was cold and rainy." },
+                { id: "q9", type: "mc", text: "9. (Multiple Choice) What did Polly notice first in Uncle Andrew's study?", options: ["A. The fireplace.", "B. The bookshelves.", "C. The microscope.", "D. The bright coloured rings."], answer: "D. The bright coloured rings." },
+                { id: "q10", type: "mc", text: "10. (Multiple Choice) What was Uncle Andrew's reaction when he saw the children?", options: ["A. He was angry and sent them away.", "B. He was frightened.", "C. He seemed pleased to see them.", "D. He ignored them."], answer: "C. He seemed pleased to see them." },
+                { id: "q11", type: "sa", text: "11. (Short Answer) Why did Polly and Digory think Uncle Andrew might be strange or mysterious?", suggested: "Uncle Andrew was mysterious because he had a forbidden study, strange behaviour, and Digory heard a yell coming from upstairs. Aunt Letty also stopped him from talking about certain things." },
+                { id: "q12", type: "sa", text: "12. (Inference) Why do you think Digory warned Polly not to touch the rings? Use evidence from the story to support your answer.", suggested: "Digory warned Polly because he did not trust Uncle Andrew. He noticed that
