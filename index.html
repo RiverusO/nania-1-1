@@ -107,7 +107,6 @@
         .submit-btn:hover { background-color: #2980b9; }
         .submit-btn:disabled { background-color: #95a5a6; cursor: not-allowed; }
         
-        /* Feedback Styles */
         .feedback {
             display: none;
             margin-top: 10px;
@@ -115,24 +114,16 @@
             border-radius: 5px;
             font-weight: bold;
         }
-        .correct-feedback {
-            color: #155724;
-            background-color: #d4edda;
-            border: 1px solid #c3e6cb;
-        }
-        .wrong-feedback {
-            color: #721c24;
-            background-color: #f8d7da;
-            border: 1px solid #f5c6cb;
-        }
+        .correct-feedback { color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb; }
+        .wrong-feedback { color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; }
         .suggested-answer {
             display: none;
             margin-top: 15px;
             padding: 15px;
-            background-color: #fff3cd;
-            border-left: 5px solid #ffc107;
+            background-color: #f8f9fa;
+            border-left: 5px solid #6c757d;
             border-radius: 4px;
-            color: #856404;
+            color: #495057;
         }
         #result-section {
             display: none;
@@ -143,12 +134,7 @@
             border-radius: 10px;
             text-align: center;
         }
-        #result-score {
-            font-size: 28px;
-            color: #2c3e50;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
+        #result-score { font-size: 28px; color: #2c3e50; font-weight: bold; margin-bottom: 15px; }
         #result-message {
             font-size: 16px;
             color: #333;
@@ -158,6 +144,31 @@
             background: #fff;
             border-radius: 8px;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        
+        /* ✨ 新增的 AI 專屬回饋區塊樣式 ✨ */
+        #ai-feedback-section {
+            display: none;
+            padding: 20px;
+            background-color: #fff8e1;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            text-align: left;
+        }
+        .ai-feedback-title {
+            font-size: 18px;
+            color: #d35400;
+            font-weight: bold;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #ffe082;
+            padding-bottom: 8px;
+        }
+        #ai-feedback-content {
+            font-size: 16px;
+            color: #424242;
+            line-height: 1.7;
+            white-space: pre-wrap; /* 確保換行正常顯示 */
         }
     </style>
 </head>
@@ -173,23 +184,26 @@
     </div>
     
     <form id="quizForm">
-        <div id="questions-container">
-            </div>
-        <button type="button" class="submit-btn" id="submitBtn" onclick="checkAnswers()">Submit Answers</button>
+        <div id="questions-container"></div>
+        <button type="button" class="submit-btn" id="submitBtn" onclick="checkAnswers()">Submit Answers & Get Teacher's Feedback</button>
     </form>
 
     <div id="result-section">
         <div id="result-score"></div>
         <div id="result-message"></div>
+        
+        <div id="ai-feedback-section">
+            <div class="ai-feedback-title">📝 Personal Feedback on Your Writing</div>
+            <div id="ai-feedback-content">Generating your personal feedback...</div>
+        </div>
     </div>
 </div>
 
 <script>
-    // User's exclusive Google Apps Script URL
+    // 您的 Google Apps Script 網址
     const GAS_URL = "https://script.google.com/macros/s/AKfycbwitzfPzW-A1-Bk0O4ozPEixlJGABW3PlQTF_nycxhPzfppEwulT-2G8RQQMpZFGTf--A/exec";
     const storyTitle = "The Magician's Nephew - Chapter 1";
 
-    // Quiz Data
     const questions = [
         { id: "q1", type: "mc", text: "Part A: 1. (True/False) Polly and Digory met for the first time in school.", options: ["True", "False"], answer: "False" },
         { id: "q2", type: "mc", text: "2. (True/False) Digory used to live in the countryside before moving to London.", options: ["True", "False"], answer: "True" },
@@ -207,17 +221,13 @@
         { id: "q14", type: "sa", text: "Part F: 14. (Personal Response) If you found a secret tunnel leading to a mysterious room, would you explore it? Why or why not? Write 3–5 sentences.", suggested: "Sample answer: I would explore the tunnel, but I would be very careful. I would want to discover what was hidden inside. However, I would make sure I was with a friend and tell an adult where I was going first." }
     ];
 
-    // Build the quiz on page load
     window.onload = function() {
         const container = document.getElementById('questions-container');
-        
         questions.forEach((q) => {
             const block = document.createElement('div');
             block.className = 'question-block';
             block.id = `block-${q.id}`;
-
             let html = `<div class="question-text">${q.text}</div>`;
-
             if (q.type === 'mc') {
                 html += `<div class="options">`;
                 q.options.forEach(opt => {
@@ -228,15 +238,12 @@
                 html += `<textarea rows="3" placeholder="Type your answer here..."></textarea>`;
                 html += `<div class="suggested-answer"><strong>Suggested Answer:</strong> ${q.suggested}</div>`;
             }
-
             block.innerHTML = html;
             container.appendChild(block);
         });
     };
 
-    // Check answers, send data to GAS, and provide feedback
     function checkAnswers() {
-        // Step 1: Validate Student Name
         const studentName = document.getElementById('studentName').value.trim();
         if (!studentName) {
             alert("Please enter your name before submitting!");
@@ -244,24 +251,20 @@
             return;
         }
 
-        // Change button state
         const submitBtn = document.getElementById('submitBtn');
-        submitBtn.innerText = "Submitting... Please wait.";
+        submitBtn.innerText = "Grading your answers... Please wait (about 10 seconds) ⏳";
         submitBtn.disabled = true;
 
         let score = 0;
         let mcTotal = 0;
 
-        // Step 2: Grade Objective Questions
         questions.forEach(q => {
             if (q.type === 'mc') {
                 mcTotal++;
                 const selected = document.querySelector(`input[name="${q.id}"]:checked`);
                 const feedbackEl = document.getElementById(`fb-${q.id}`);
                 const blockEl = document.getElementById(`block-${q.id}`);
-                
                 feedbackEl.style.display = "block";
-
                 if (selected) {
                     if (selected.value === q.answer) {
                         score++;
@@ -281,10 +284,8 @@
             }
         });
 
-        // Expand suggested answers
         document.querySelectorAll('.suggested-answer').forEach(el => el.style.display = 'block');
 
-        // Step 3: Collect Text Area Answers
         const textareas = document.querySelectorAll('#questions-container textarea');
         const q11Answer = textareas.length > 0 ? "Q11: " + textareas[0].value : "";
         const q12Answer = textareas.length > 1 ? "Q12: " + textareas[1].value : "";
@@ -294,7 +295,6 @@
         const q14Answer = textareas.length > 3 ? "Q14: " + textareas[3].value : "";
         const combinedQ5Column = q13Answer + "\n\n" + q14Answer;
 
-        // Step 4: Prepare Data Payload for GAS
         const dataPayload = {
             studentName: studentName,
             storyTitle: storyTitle,
@@ -303,23 +303,38 @@
             q5: combinedQ5Column
         };
 
-        // Step 5: Send to Google Apps Script
+        // ✨ 關鍵升級：接收後台傳回來的 JSON 資料
         fetch(GAS_URL, {
             method: 'POST',
             body: JSON.stringify(dataPayload)
         })
-        .then(response => {
+        .then(response => response.json()) // 告訴網頁這是 JSON 格式
+        .then(data => {
             submitBtn.style.display = 'none';
             displayFeedback(score, mcTotal);
+            
+            // 處理並顯示 AI 評語
+            if (data.feedback) {
+                const aiSection = document.getElementById('ai-feedback-section');
+                const aiContent = document.getElementById('ai-feedback-content');
+                
+                aiSection.style.display = 'block';
+                
+                // 將 AI 生成的 **粗體** 轉換為 HTML 的 <strong> 標籤
+                let formattedText = data.feedback.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                aiContent.innerHTML = formattedText;
+                
+                // 自動捲動到回饋區
+                aiSection.scrollIntoView({ behavior: 'smooth' });
+            }
         })
         .catch(error => {
             alert("Network error. Please try submitting again!");
-            submitBtn.innerText = "Submit Answers";
+            submitBtn.innerText = "Submit Answers & Get Teacher's Feedback";
             submitBtn.disabled = false;
         });
     }
 
-    // Dynamic, substantive feedback generation
     function displayFeedback(score, total) {
         const resultSection = document.getElementById('result-section');
         const scoreEl = document.getElementById('result-score');
@@ -330,21 +345,30 @@
 
         let ratio = score / total;
         let specificDetail = "how Digory missed his pony in the countryside, and how Uncle Andrew tricked Polly into touching the mysterious yellow rings in his forbidden study";
-        let feedbackHTML = "";
+        let feedbackPool = [];
 
         if (ratio === 1) {
-            feedbackHTML = `<strong>Absolutely brilliant work! 🏆 Your reading comprehension skills are outstanding!</strong><br>
-            You paid incredibly close attention to the story. You perfectly understood ${specificDetail}! Getting a perfect score on the objective questions shows you are a very careful reader. Please scroll down to review your short answers and see if your thoughts match the suggested deep insights. Keep up the amazing work!`;
+            feedbackPool = [
+                `<strong>Absolutely brilliant work! 🏆 Your reading comprehension skills are outstanding!</strong><br>You paid incredibly close attention to the story. You perfectly understood ${specificDetail}! Please scroll down to review your short answers and personal feedback.`,
+                `<strong>Flawless victory! 🌟 You nailed every single question!</strong><br>Your grasp of the chapter is truly impressive. Check your short answers and your personalized feedback below!`,
+                `<strong>Perfect score! 🎉 You are a reading superstar!</strong><br>It is not easy to catch every detail. I am incredibly proud of your focus. Scroll down to see the feedback on your writing.`
+            ];
         } else if (ratio >= 0.7) {
-            feedbackHTML = `<strong>Great job! You have a really solid grasp of the story's main plot! 🌟</strong><br>
-            You clearly understood the core events of Chapter 1. For the questions you missed, try looking back at the text for clues—especially paying attention to character dialogues or specific details (like ${specificDetail}). Reviewing your mistakes above will help you catch even more magical details next time. You are doing fantastic!`;
+            feedbackPool = [
+                `<strong>Great job! You have a really solid grasp of the story's main plot! 👍</strong><br>Review your mistakes above, and don't forget to read your personalized writing feedback below!`,
+                `<strong>Well done! 👏 You're really getting the hang of this story!</strong><br>Don't worry about the few mistakes; they are just stepping stones to getting better. Check your writing feedback below!`,
+                `<strong>Awesome effort! 🚀 Your reading skills are definitely shining through!</strong><br>You are on the right track! Scroll down to see your personal feedback on the short answers.`
+            ];
         } else {
-            feedbackHTML = `<strong>Completing the quiz is a fantastic first step! 💪 I am proud of your effort!</strong><br>
-            Building reading comprehension takes time and practice, especially with a magical mystery story like this one! Chapter 1 has quite a few specific details to keep track of (such as ${specificDetail}), which can sometimes be tricky. Don't be discouraged at all! I highly recommend reviewing the "Correct Answers" above, and then reading the chapter one more time with those answers in mind. You will be surprised at how the clues stand out! Keep trying, you will definitely improve!`;
+            feedbackPool = [
+                `<strong>Completing the quiz is a fantastic first step! 💪 I am proud of your effort!</strong><br>Building reading comprehension takes time and practice. Review the correct answers above, and check your personal writing feedback below!`,
+                `<strong>Good try! 🌈 Every expert was once a beginner!</strong><br>It is completely normal to find it challenging. Take a deep breath, review the mistakes, and read your teacher's feedback below.`,
+                `<strong>Thank you for your hard work! 💡 Learning is all about practice!</strong><br>Look over the correct answers, and don't give up. Scroll down to read your personalized feedback on your writing!`
+            ];
         }
 
-        msgEl.innerHTML = feedbackHTML;
-        resultSection.scrollIntoView({ behavior: 'smooth' });
+        const randomIndex = Math.floor(Math.random() * feedbackPool.length);
+        msgEl.innerHTML = feedbackPool[randomIndex];
     }
 </script>
 </body>
