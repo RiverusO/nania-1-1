@@ -116,6 +116,7 @@
         }
         .correct-feedback { color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb; }
         .wrong-feedback { color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; }
+        
         .suggested-answer {
             display: none;
             margin-top: 15px;
@@ -125,6 +126,19 @@
             border-radius: 4px;
             color: #495057;
         }
+
+        /* 💡 每題獨立的文法糾正區塊樣式 */
+        .ai-question-correction {
+            display: none;
+            margin-top: 10px;
+            padding: 15px;
+            background-color: #eef2f7;
+            border-left: 5px solid #2980b9;
+            border-radius: 4px;
+            color: #2c3e50;
+            font-size: 15px;
+        }
+        
         #result-section {
             display: none;
             margin-top: 40px;
@@ -147,7 +161,7 @@
             margin-bottom: 20px;
         }
         
-        /* ✨ 新增的 AI 專屬回饋區塊樣式 ✨ */
+        /* 底部總評語區塊樣式 */
         #ai-feedback-section {
             display: none;
             padding: 20px;
@@ -168,7 +182,7 @@
             font-size: 16px;
             color: #424242;
             line-height: 1.7;
-            white-space: pre-wrap; /* 確保換行正常顯示 */
+            white-space: pre-wrap;
         }
     </style>
 </head>
@@ -193,14 +207,13 @@
         <div id="result-message"></div>
         
         <div id="ai-feedback-section">
-            <div class="ai-feedback-title">📝 Personal Feedback on Your Writing</div>
-            <div id="ai-feedback-content">Generating your personal feedback...</div>
+            <div class="ai-feedback-title">📝 Overall Teacher's Review</div>
+            <div id="ai-feedback-content">Generating your overall review...</div>
         </div>
     </div>
 </div>
 
 <script>
-    // 您的 Google Apps Script 網址
     const GAS_URL = "https://script.google.com/macros/s/AKfycbwitzfPzW-A1-Bk0O4ozPEixlJGABW3PlQTF_nycxhPzfppEwulT-2G8RQQMpZFGTf--A/exec";
     const storyTitle = "The Magician's Nephew - Chapter 1";
 
@@ -236,7 +249,9 @@
                 html += `</div><div class="feedback" id="fb-${q.id}"></div>`;
             } else if (q.type === 'sa') {
                 html += `<textarea rows="3" placeholder="Type your answer here..."></textarea>`;
-                html += `<div class="suggested-answer"><strong>Suggested Answer:</strong> ${q.suggested}</div>`;
+                html += `<div class="suggested-answer" id="suggested-${q.id}"><strong>Suggested Answer:</strong> ${q.suggested}</div>`;
+                // ✨ 動態新增：每題正確答案下方的 AI 修正對話框
+                html += `<div class="ai-question-correction" id="ai-corr-${q.id}"><strong>Teacher's Sentence Review:</strong> <span class="corr-content">Loading...</span></div>`;
             }
             block.innerHTML = html;
             container.appendChild(block);
@@ -285,47 +300,50 @@
         });
 
         document.querySelectorAll('.suggested-answer').forEach(el => el.style.display = 'block');
+        // 顯示每題下方的 AI 修正對話框（先秀出 Loading...）
+        document.querySelectorAll('.ai-question-correction').forEach(el => el.style.display = 'block');
 
         const textareas = document.querySelectorAll('#questions-container textarea');
-        const q11Answer = textareas.length > 0 ? "Q11: " + textareas[0].value : "";
-        const q12Answer = textareas.length > 1 ? "Q12: " + textareas[1].value : "";
-        const combinedQ4Column = q11Answer + "\n\n" + q12Answer;
-
-        const q13Answer = textareas.length > 2 ? "Q13: " + textareas[2].value : "";
-        const q14Answer = textareas.length > 3 ? "Q14: " + textareas[3].value : "";
-        const combinedQ5Column = q13Answer + "\n\n" + q14Answer;
-
+        
+        // 將四題簡答題分開打包發送
         const dataPayload = {
             studentName: studentName,
             storyTitle: storyTitle,
             score: score + " / " + mcTotal,
-            q4: combinedQ4Column,
-            q5: combinedQ5Column
+            q11: textareas.length > 0 ? textareas[0].value : "",
+            q12: textareas.length > 1 ? textareas[1].value : "",
+            q13: textareas.length > 2 ? textareas[2].value : "",
+            q14: textareas.length > 3 ? textareas[3].value : ""
         };
 
-        // ✨ 關鍵升級：接收後台傳回來的 JSON 資料
         fetch(GAS_URL, {
             method: 'POST',
             body: JSON.stringify(dataPayload)
         })
-        .then(response => response.json()) // 告訴網頁這是 JSON 格式
+        .then(response => response.json())
         .then(data => {
             submitBtn.style.display = 'none';
             displayFeedback(score, mcTotal);
             
-            // 處理並顯示 AI 評語
             if (data.feedback) {
+                // 1. 底部只填入「總評語」
                 const aiSection = document.getElementById('ai-feedback-section');
                 const aiContent = document.getElementById('ai-feedback-content');
-                
                 aiSection.style.display = 'block';
+                aiContent.innerHTML = data.feedback.overall.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
                 
-                // 將 AI 生成的 **粗體** 轉換為 HTML 的 <strong> 標籤
-                let formattedText = data.feedback.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-                aiContent.innerHTML = formattedText;
+                // 2. 將個別題目的糾正/引導，分發到每題正確答案的下面
+                const qIds = ['q11', 'q12', 'q13', 'q14'];
+                qIds.forEach(id => {
+                    const corrBox = document.getElementById(`ai-corr-${id}`);
+                    if (corrBox && data.feedback[id]) {
+                        const contentSpan = corrBox.querySelector('.corr-content');
+                        let formattedText = data.feedback[id].replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                        contentSpan.innerHTML = formattedText;
+                    }
+                });
                 
-                // 自動捲動到回饋區
-                aiSection.scrollIntoView({ behavior: 'smooth' });
+                document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
             }
         })
         .catch(error => {
@@ -349,21 +367,18 @@
 
         if (ratio === 1) {
             feedbackPool = [
-                `<strong>Absolutely brilliant work! 🏆 Your reading comprehension skills are outstanding!</strong><br>You paid incredibly close attention to the story. You perfectly understood ${specificDetail}! Please scroll down to review your short answers and personal feedback.`,
-                `<strong>Flawless victory! 🌟 You nailed every single question!</strong><br>Your grasp of the chapter is truly impressive. Check your short answers and your personalized feedback below!`,
-                `<strong>Perfect score! 🎉 You are a reading superstar!</strong><br>It is not easy to catch every detail. I am incredibly proud of your focus. Scroll down to see the feedback on your writing.`
+                `<strong>Absolutely brilliant work! 🏆 Your reading comprehension skills are outstanding!</strong><br>You paid incredibly close attention to the story. Getting a perfect score shows you are a very careful reader. Please review your sentence evaluations below.`,
+                `<strong>Flawless victory! 🌟 You nailed every single question!</strong><br>Your grasp of the chapter is truly impressive. Check your individual question reviews below!`
             ];
         } else if (ratio >= 0.7) {
             feedbackPool = [
-                `<strong>Great job! You have a really solid grasp of the story's main plot! 👍</strong><br>Review your mistakes above, and don't forget to read your personalized writing feedback below!`,
-                `<strong>Well done! 👏 You're really getting the hang of this story!</strong><br>Don't worry about the few mistakes; they are just stepping stones to getting better. Check your writing feedback below!`,
-                `<strong>Awesome effort! 🚀 Your reading skills are definitely shining through!</strong><br>You are on the right track! Scroll down to see your personal feedback on the short answers.`
+                `<strong>Great job! You have a really solid grasp of the story's main plot! 👍</strong><br>Review your objective mistakes above, and check your personalized writing feedback under each short answer!`,
+                `<strong>Well done! 👏 You're really getting the hang of this story!</strong><br>Don't worry about the few mistakes. Check your writing tips and hints provided below each question!`
             ];
         } else {
             feedbackPool = [
-                `<strong>Completing the quiz is a fantastic first step! 💪 I am proud of your effort!</strong><br>Building reading comprehension takes time and practice. Review the correct answers above, and check your personal writing feedback below!`,
-                `<strong>Good try! 🌈 Every expert was once a beginner!</strong><br>It is completely normal to find it challenging. Take a deep breath, review the mistakes, and read your teacher's feedback below.`,
-                `<strong>Thank you for your hard work! 💡 Learning is all about practice!</strong><br>Look over the correct answers, and don't give up. Scroll down to read your personalized feedback on your writing!`
+                `<strong>Completing the quiz is a fantastic first step! 💪 I am proud of your effort!</strong><br>Building reading comprehension takes time and practice. Review the correct choices, and look at the teacher's hints under each short answer to guide your next attempt!`,
+                `<strong>Thank you for your hard work! 💡 Learning is all about practice!</strong><br>Some of these questions were tricky. Look over the correct answers and read your personalized feedback below each question!`
             ];
         }
 
