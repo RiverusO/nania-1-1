@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Reading Challenge - The Magician's Nephew Ch.2</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 30px 20px; background-color: #f4f7f6; }
+        .container { background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #2980b9; margin-top: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px; text-align: center; }
+        .name-input-section { text-align: center; margin-bottom: 25px; margin-top: 20px; background: #e8f4fd; padding: 20px; border-radius: 8px; border: 2px solid #b6d4fe; }
+        .name-input-section label { font-weight: bold; font-size: 18px; color: #2c3e50; margin-right: 10px; }
+        .name-input-section input { padding: 10px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; width: 60%; max-width: 300px; }
+        .question-block { margin-bottom: 25px; padding: 15px; border-radius: 8px; border: 1px solid transparent; background-color: #fcfcfc; }
+        .question-text { font-weight: bold; margin-bottom: 10px; font-size: 1.1em; color: #2c3e50; }
+        .options label { display: block; margin-bottom: 8px; cursor: pointer; padding: 8px 10px; border-radius: 5px; transition: background 0.2s; }
+        .options label:hover { background-color: #f0f8ff; }
+        .options input[type="radio"] { margin-right: 10px; }
+        textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; font-size: 16px; resize: vertical; box-sizing: border-box; margin-top: 10px; }
+        .submit-btn { display: block; width: 100%; padding: 15px; background-color: #3498db; color: white; font-size: 18px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-top: 30px; transition: background 0.3s; }
+        .submit-btn:hover { background-color: #2980b9; }
+        .submit-btn:disabled { background-color: #95a5a6; cursor: not-allowed; }
+        .feedback { display: none; margin-top: 10px; padding: 10px; border-radius: 5px; font-weight: bold; }
+        .correct-feedback { color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb; }
+        .wrong-feedback { color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; }
+        .suggested-answer { display: none; margin-top: 15px; padding: 15px; background-color: #f8f9fa; border-left: 5px solid #6c757d; border-radius: 4px; color: #495057; }
+        #result-section { display: none; margin-top: 40px; padding: 25px; background-color: #e8f4fd; border: 2px solid #3498db; border-radius: 10px; text-align: center; }
+        #result-score { font-size: 28px; color: #2c3e50; font-weight: bold; margin-bottom: 15px; }
+        #result-message { font-size: 16px; color: #333; text-align: left; line-height: 1.8; padding: 15px; background: #fff; border-radius: 8px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📚 English Reading Challenge</h1>
+    <h2>The Magician's Nephew<br>Chapter 2: Digory and His Uncle</h2>
+
+    <div class="name-input-section">
+        <label for="studentName">Student Name:</label>
+        <input type="text" id="studentName" placeholder="Enter your full name here">
+    </div>
+    
+    <form id="quizForm">
+        <div id="questions-container"></div>
+        <button type="button" class="submit-btn" id="submitBtn" onclick="checkAnswers()">Submit Answers</button>
+    </form>
+
+    <div id="result-section">
+        <div id="result-score"></div>
+        <div id="result-message"></div>
+    </div>
+</div>
+
+<script>
+    // 您的專屬 Google Apps Script 網址 (與第一章相同)
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbwitzfPzW-A1-Bk0O4ozPEixlJGABW3PlQTF_nycxhPzfppEwulT-2G8RQQMpZFGTf--A/exec";
+    const storyTitle = "The Magician's Nephew - Chapter 2";
+
+    const questions = [
+        // Part A: True or False
+        { id: "q1", type: "mc", text: "Part A: 1. (True/False) Digory screamed when Polly disappeared.", options: ["True", "False"], answer: "True" },
+        { id: "q2", type: "mc", text: "2. (True/False) Uncle Andrew was upset because his experiment had failed.", options: ["True", "False"], answer: "False" },
+        { id: "q3", type: "mc", text: "3. (True/False) Mrs Lefay was Uncle Andrew's godmother.", options: ["True", "False"], answer: "True" },
+        { id: "q4", type: "mc", text: "4. (True/False) Uncle Andrew kept his promise to burn the mysterious box.", options: ["True", "False"], answer: "False" },
+        { id: "q5", type: "mc", text: "5. (True/False) Uncle Andrew believed that great thinkers should always follow the same rules as everyone else.", options: ["True", "False"], answer: "False" },
+        { id: "q6", type: "mc", text: "6. (True/False) The yellow rings were made from dust that came from another world.", options: ["True", "False"], answer: "True" },
+        { id: "q7", type: "mc", text: "7. (True/False) Uncle Andrew was willing to use himself as the first test subject.", options: ["True", "False"], answer: "False" },
+        
+        // Part B: Multiple Choice
+        { id: "q8", type: "mc", text: "Part B: 8. Why did Digory stop screaming?", options: ["A. He was no longer afraid.", "B. Uncle Andrew threatened him.", "C. He remembered that the noise might frighten his sick mother.", "D. Polly came back."], answer: "C. He remembered that the noise might frighten his sick mother." },
+        { id: "q9", type: "mc", text: "9. What happened when Polly touched the yellow ring?", options: ["A. She became invisible.", "B. She fell asleep.", "C. She disappeared from the world.", "D. She turned into a fairy."], answer: "C. She disappeared from the world." },
+        { id: "q10", type: "mc", text: "10. Where did Uncle Andrew say the mysterious box came from?", options: ["A. Egypt", "B. Atlantis", "C. Babylon", "D. China"], answer: "B. Atlantis" },
+        { id: "q11", type: "mc", text: "11. What was inside the ancient box?", options: ["A. Jewels", "B. A map", "C. Fairy dust", "D. Fine dust from another world"], answer: "D. Fine dust from another world" },
+        { id: "q12", type: "mc", text: "12. Who did Uncle Andrew use in his early experiments?", options: ["A. Mice", "B. Rabbits", "C. Guinea pigs", "D. Birds"], answer: "C. Guinea pigs" },
+        { id: "q13", type: "mc", text: "13. According to Uncle Andrew, what do the yellow rings do?", options: ["A. Bring people home", "B. Make people invisible", "C. Send people to another world", "D. Make people fly"], answer: "C. Send people to another world" },
+        { id: "q14", type: "mc", text: "14. What do the green rings do?", options: ["A. Turn into gold", "B. Bring people back", "C. Open doors", "D. Protect people from danger"], answer: "B. Bring people back" },
+        { id: "q15", type: "mc", text: "15. Why did Digory become angry with Uncle Andrew?", options: ["A. Uncle Andrew shouted at him.", "B. Uncle Andrew lied about Polly.", "C. Uncle Andrew sent Polly somewhere dangerous but would not go himself.", "D. Uncle Andrew broke his favourite toy."], answer: "C. Uncle Andrew sent Polly somewhere dangerous but would not go himself." },
+        { id: "q16", type: "mc", text: "16. Which word best describes Uncle Andrew?", options: ["A. Selfless", "B. Brave", "C. Curious", "D. Selfish"], answer: "D. Selfish" },
+        { id: "q17", type: "mc", text: "17. Why did Digory finally decide to take the yellow ring?", options: ["A. He wanted to become famous.", "B. He wanted to prove he was brave.", "C. He wanted to rescue Polly.", "D. He wanted to learn magic."], answer: "C. He wanted to rescue Polly." },
+        
+        // Parts C, D, E: Short Answers
+        { id: "q18", type: "sa", text: "Part C: 18. (Short Answer) Why did Digory dislike Uncle Andrew more and more as the conversation continued? (Write 2–3 sentences)", suggested: "Digory disliked Uncle Andrew because he cared more about his experiment than about Polly's safety. He also thought Uncle Andrew was selfish and dishonest because he broke his promise and refused to take risks himself." },
+        { id: "q19", type: "sa", text: "Part D: 19. (Inference Question) What can we learn about Uncle Andrew's character from the fact that he used guinea pigs and Polly for his experiments but refused to go himself? (Use evidence from the story)", suggested: "This shows that Uncle Andrew is selfish and cowardly. He is willing to put animals and children in danger to learn new things, but he is not willing to face the same risks himself. He cares more about his experiment than about other people's safety." },
+        { id: "q20", type: "sa", text: "Part E: 20. (Personal Response) Do you think Digory made the right decision by going after Polly? Explain your opinion using examples from the story. (Write 4–6 sentences)", suggested: "Yes, I think Digory made the right decision. Polly was his friend, and she had disappeared because of Uncle Andrew's experiment. Even though Digory was scared, he was brave enough to help her. A good friend does not leave someone in danger. His decision shows courage and loyalty." }
+    ];
+
+    window.onload = function() {
+        const container = document.getElementById('questions-container');
+        questions.forEach((q) => {
+            const block = document.createElement('div');
+            block.className = 'question-block';
+            block.id = `block-${q.id}`;
+            let html = `<div class="question-text">${q.text}</div>`;
+            if (q.type === 'mc') {
+                html += `<div class="options">`;
+                q.options.forEach(opt => {
+                    html += `<label><input type="radio" name="${q.id}" value="${opt}"> ${opt}</label>`;
+                });
+                html += `</div><div class="feedback" id="fb-${q.id}"></div>`;
+            } else if (q.type === 'sa') {
+                html += `<textarea rows="3" placeholder="Type your answer here..."></textarea>`;
+                html += `<div class="suggested-answer"><strong>Suggested Answer:</strong> ${q.suggested}</div>`;
+            }
+            block.innerHTML = html;
+            container.appendChild(block);
+        });
+    };
+
+    function checkAnswers() {
+        const studentName = document.getElementById('studentName').value.trim();
+        if (!studentName) {
+            alert("Please enter your name before submitting!");
+            document.getElementById('studentName').focus();
+            return;
+        }
+
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.innerText = "Submitting... Please wait.";
+        submitBtn.disabled = true;
+
+        let score = 0;
+        let mcTotal = 0;
+
+        // Grade Objective Questions
+        questions.forEach(q => {
+            if (q.type === 'mc') {
+                mcTotal++;
+                const selected = document.querySelector(`input[name="${q.id}"]:checked`);
+                const feedbackEl = document.getElementById(`fb-${q.id}`);
+                const blockEl = document.getElementById(`block-${q.id}`);
+                feedbackEl.style.display = "block";
+                if (selected) {
+                    if (selected.value === q.answer) {
+                        score++;
+                        feedbackEl.innerHTML = "✅ Correct";
+                        feedbackEl.className = "feedback correct-feedback";
+                        blockEl.style.borderColor = "#c3e6cb";
+                    } else {
+                        feedbackEl.innerHTML = `❌ Incorrect. Correct Answer: <strong>${q.answer}</strong>`;
+                        feedbackEl.className = "feedback wrong-feedback";
+                        blockEl.style.borderColor = "#f5c6cb";
+                    }
+                } else {
+                    feedbackEl.innerHTML = `⚠️ Unanswered. Correct Answer: <strong>${q.answer}</strong>`;
+                    feedbackEl.className = "feedback wrong-feedback";
+                    blockEl.style.borderColor = "#f5c6cb";
+                }
+            }
+        });
+
+        // Show suggested answers for writing
+        document.querySelectorAll('.suggested-answer').forEach(el => el.style.display = 'block');
+
+        // Collect Short Answers
+        const textareas = document.querySelectorAll('#questions-container textarea');
+        
+        const dataPayload = {
+            studentName: studentName,
+            storyTitle: storyTitle,
+            score: score + " / " + mcTotal,
+            q18: textareas.length > 0 ? textareas[0].value : "",
+            q19: textareas.length > 1 ? textareas[1].value : "",
+            q20: textareas.length > 2 ? textareas[2].value : ""
+        };
+
+        // Send to GAS
+        fetch(GAS_URL, {
+            method: 'POST',
+            body: JSON.stringify(dataPayload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            submitBtn.style.display = 'none';
+            displayFeedback(score, mcTotal);
+        })
+        .catch(error => {
+            alert("Network error. Your answers were checked, but might not be saved to the teacher's list.");
+            submitBtn.style.display = 'none';
+            displayFeedback(score, mcTotal);
+        });
+    }
+
+    // Dynamic Feedback System
+    function displayFeedback(score, total) {
+        const resultSection = document.getElementById('result-section');
+        const scoreEl = document.getElementById('result-score');
+        const msgEl = document.getElementById('result-message');
+
+        resultSection.style.display = 'block';
+        scoreEl.innerText = `Objective Questions Score: ${score} / ${total}`;
+
+        let ratio = score / total;
+        let specificDetail = "the differences between the yellow and green rings, and Uncle Andrew's selfish experiments";
+        let feedbackPool = [];
+
+        if (ratio === 1) {
+            feedbackPool = [
+                `<strong>Absolutely brilliant work! 🏆 Your reading comprehension skills are outstanding!</strong><br>You paid incredibly close attention to Chapter 2. You perfectly understood ${specificDetail}! Getting a perfect score shows you are a very careful reader. Please scroll down to review the suggested answers for your writing questions. Keep up the amazing work!`,
+                `<strong>Flawless victory! 🌟 You nailed every single question!</strong><br>Your grasp of this chapter is truly impressive, especially regarding details like ${specificDetail}. You have a great talent for understanding the characters' motivations. Check the sample answers below, and keep this fantastic momentum going!`,
+                `<strong>Perfect score! 🎉 You are a reading superstar!</strong><br>It is not easy to catch every detail about Atlantis and the magic dust, but you clearly understood it without any problems. I am incredibly proud of your focus. Excellent job!`
+            ];
+        } else if (ratio >= 0.7) {
+            feedbackPool = [
+                `<strong>Great job! You have a really solid grasp of the story's main plot! 👍</strong><br>You clearly understood the core events of Chapter 2. For the questions you missed, try looking back at the text for clues (like ${specificDetail}). Reviewing your mistakes above will help you catch even more magical details next time. You are doing fantastic!`,
+                `<strong>Well done! 👏 You're really getting the hang of this story!</strong><br>You understood most of what happened. Don't worry about the few mistakes; they are just stepping stones to getting better. Keep specific plot points in mind, like ${specificDetail}, when you review. Keep up the good work!`,
+                `<strong>Awesome effort! 🚀 Your reading skills are definitely shining through!</strong><br>You caught many of the important events. To get an even higher score next time, pay close attention to the characters' true intentions. You are on the right track!`
+            ];
+        } else {
+            feedbackPool = [
+                `<strong>Completing the quiz is a fantastic first step! 💪 I am proud of your effort!</strong><br>Building reading comprehension takes time and practice, especially with a magical mystery story like this one! Chapter 2 has quite a few specific details to keep track of (such as ${specificDetail}). Don't be discouraged at all! Review the correct answers above, and keep trying!`,
+                `<strong>Good try! 🌈 Every expert was once a beginner!</strong><br>This chapter had a lot of tricky information, like ${specificDetail}. It is completely normal to find it challenging. Take a deep breath, review the mistakes, and maybe re-read those specific parts. You will definitely improve!`,
+                `<strong>Thank you for your hard work! 💡 Learning is all about practice!</strong><br>Some of these questions were quite difficult. Remember the details about the magic dust and Uncle Andrew's cruelty? Those details can be easy to miss. Look over the correct answers, and don't give up. I believe in your potential to get better every time!`
+            ];
+        }
+
+        const randomIndex = Math.floor(Math.random() * feedbackPool.length);
+        msgEl.innerHTML = feedbackPool[randomIndex];
+        
+        resultSection.scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+</body>
+</html>
